@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Projects — Nelson Asagwara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --border: rgba(255,255,255,0.10);
+            --muted: rgba(255,255,255,0.35);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { background: var(--black); color: var(--white); scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--black); overflow-x: hidden; min-height: 100vh; }
+        .mono { font-family: 'Space Mono', monospace; }
+
+        header {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-link {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.25s var(--ease);
+            min-height: 44px;
+        }
+        .back-link:hover { color: var(--white); }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--white);
+            animation: blink 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.2; }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+        }
+        .reveal.in { opacity: 1; transform: none; }
+
+        .project-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+        }
+        .project-card:hover {
+            border-color: rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.04);
+        }
+        .project-card.coming-soon {
+            opacity: 0.45;
+            cursor: default;
+            border-style: dashed;
+        }
+        .project-card.coming-soon:hover {
+            border-color: var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .live-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--white);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            padding: 3px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 20px 0 calc(24px + env(safe-area-inset-bottom));
+        }
+        footer a {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.25s var(--ease);
+        }
+        footer a:hover { color: var(--white); }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-3.5 flex justify-between items-center">
+        <a href="./index.html" class="back-link">← Core Feed</a>
+        <span class="mono text-[11px] font-bold tracking-[0.18em] text-white">PROJECTS // ARCHIVE</span>
+        <div class="mono text-[9px] text-neutral-400 bg-neutral-950 px-2.5 py-1 rounded" style="border:1px solid var(--border); display:flex; align-items:center; gap:6px;">
+            <span class="pulse" style="width:5px;height:5px;"></span>
+            <span id="live-year">2026</span>
+        </div>
+    </div>
+</header>
+
+
+<main class="w-full max-w-lg mx-auto px-4 sm:px-5 flex flex-col gap-10 sm:gap-14 py-10 sm:py-14">
+
+
+    <!-- INTRO -->
+    <section class="space-y-4 pt-2">
+
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            ALL PROJECTS — PATH TO GLOBAL RELEVANCE
+        </div>
+
+        <h1 class="text-[1.75rem] leading-[1.15] font-black tracking-tight">Everything<br>Built So Far</h1>
+
+        <p class="text-sm text-neutral-400 font-light leading-relaxed">
+            Every project here was built from scratch. No tutorials followed blindly — every concept explained, every line understood.
+        </p>
+
+    </section>
+
+
+    <!-- PRODUCTION PROJECTS -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">PRODUCTION // LIVE PROJECTS</div>
+
+        <a href="./bankapi.html" class="project-card">
+            <div class="flex justify-between items-start mb-4">
+                <div class="mono text-[10px] text-neutral-600">[PROJECT_01]</div>
+                <span class="live-badge">
+                    <span class="pulse" style="width:5px;height:5px;"></span>
+                    LIVE ON AWS
+                </span>
+            </div>
+            <h3 class="text-base font-bold mb-2">BankAPI</h3>
+            <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-4">
+                Production-grade secured REST API. JWT authentication, PostgreSQL, Docker, deployed on AWS EC2. 7 endpoints. Full input validation and error handling.
+            </p>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="tag">Java</span>
+                <span class="tag">Spring Boot</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">Docker</span>
+                <span class="tag">JWT</span>
+                <span class="tag">AWS EC2</span>
+            </div>
+            <div class="pt-3 border-t" style="border-color:var(--border);">
+                <p class="mono text-[9px] text-neutral-600">VIEW PROJECT →</p>
+            </div>
+        </a>
+
+    </section>
+
+
+    <!-- JAVA MASTERY PROJECTS -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">JAVA MASTERY // CORE PROJECTS</div>
+
+        <div class="flex flex-col gap-3">
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_02]</div>
+                <h3 class="text-sm font-semibold mb-2">Student Report System</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">
+                    Built with Enums, Interfaces, and Generics. A grading system that evolved through 4 stages — from plain class to a fully generic report generator.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">Enums</span>
+                    <span class="tag">Generics</span>
+                    <span class="tag">Interfaces</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_03]</div>
+                <h3 class="text-sm font-semibold mb-2">Library Management System</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">
+                    Polymorphism in action. Abstract parent class with Book, Magazine, and DVD children. Collections with for-each loops.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">OOP</span>
+                    <span class="tag">Polymorphism</span>
+                    <span class="tag">Abstract Classes</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_04]</div>
+                <h3 class="text-sm font-semibold mb-2">E-Commerce Cart System</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">
+                    Streams and Lambdas. Replaced for-loops with functional programming — filter, map, sorted, method references.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">Streams</span>
+                    <span class="tag">Lambdas</span>
+                    <span class="tag">Functional</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_05]</div>
+                <h3 class="text-sm font-semibold mb-2">Clean Architecture System</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">
+                    Custom exceptions, generic repository pattern, validation logic. The foundation that made BankAPI possible.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">Clean Architecture</span>
+                    <span class="tag">Generics</span>
+                    <span class="tag">Exceptions</span>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CONSOLE PROJECTS -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">FOUNDATIONS // CONSOLE PROJECTS</div>
+
+        <div class="flex flex-col gap-3">
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_06]</div>
+                <h3 class="text-sm font-semibold mb-2">Console Calculator</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">First real project. Arithmetic operations, user input, error handling for division by zero.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">Console</span>
+                    <span class="tag">Conditionals</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_07]</div>
+                <h3 class="text-sm font-semibold mb-2">Number Guessing Game</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">Random number generation, while loops, user feedback. First interactive program.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">Loops</span>
+                    <span class="tag">Random</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_08]</div>
+                <h3 class="text-sm font-semibold mb-2">Inventory Management System</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-3">HashMaps and ArrayLists in practice. Add, remove, search inventory items.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="tag">Java</span>
+                    <span class="tag">HashMap</span>
+                    <span class="tag">ArrayList</span>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- COMING SOON -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">COMING SOON // NEXT BUILDS</div>
+
+        <div class="project-card coming-soon">
+            <div class="mono text-[10px] text-neutral-600 mb-3">[PROJECT_??]</div>
+            <h3 class="text-sm font-semibold mb-2">Next Project</h3>
+            <p class="text-[12px] text-neutral-400 font-light">In progress. Check back soon.</p>
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+<footer>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5">
+        <div style="height:1px; background:var(--border); margin-bottom:20px;"></div>
+        <div class="flex justify-between items-center">
+            <span class="mono text-[11px] font-bold tracking-[0.18em] text-white">// TO BE CONTINUED...</span>
+            <a href="./index.html">← CORE FEED</a>
+        </div>
+        <p class="mono text-[10px] text-neutral-600 mt-4" style="letter-spacing:0.1em;">© <span id="footer-year">2026</span> NELSON ASAGWARA // ALL SYSTEMS ACTIVE</p>
+    </div>
+</footer>
+
+
+<script>
+(function () {
+    const y = new Date().getFullYear();
+    document.getElementById('live-year').textContent   = y;
+    document.getElementById('footer-year').textContent = y;
+})();
+
+(function () {
+    const els = document.querySelectorAll('.reveal');
+    const io  = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.08 });
+    els.forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Nelson Asagwara — Path to Global Relevance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --border: rgba(255,255,255,0.10);
+            --muted: rgba(255,255,255,0.35);
+            --dim: rgba(255,255,255,0.55);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { background: var(--black); color: var(--white); scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--black);
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .mono { font-family: 'Space Mono', monospace; }
+        .line-box { border: 1px solid var(--border); }
+
+        .chip {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding-top: env(safe-area-inset-top);
+        }
+
+        #hero {
+            position: relative;
+            height: 100svh;
+            min-height: 580px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+
+        #hero-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(1) contrast(1.2);
+            opacity: 0.15;
+            transition: opacity 0.8s var(--ease);
+        }
+
+        #hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top,
+                rgba(0,0,0,0.97) 0%,
+                rgba(0,0,0,0.55) 42%,
+                rgba(0,0,0,0.08) 100%);
+            pointer-events: none;
+        }
+
+        .hero-content { position: relative; z-index: 2; }
+
+        #hero-title {
+            font-size: clamp(2rem, 9vw, 3.2rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+
+        .speech-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 18px;
+        }
+
+        .affirmation-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 10px;
+            padding: 18px 18px 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .affirmation-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 2px;
+            background: var(--white);
+            opacity: 0.55;
+        }
+
+        .stat-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .project-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            text-decoration: none;
+            display: block;
+            transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+        }
+        .project-card:hover {
+            border-color: rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .phase-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .phase-row:last-child { border-bottom: none; }
+        .phase-index {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            min-width: 28px;
+            margin-top: 2px;
+        }
+        .phase-body h4 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+        .phase-body p {
+            font-size: 0.72rem;
+            line-height: 1.72;
+            color: var(--muted);
+            font-weight: 300;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 20px 0 calc(24px + env(safe-area-inset-bottom));
+        }
+
+        .footer-sign {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--white);
+        }
+
+        footer a {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.25s var(--ease);
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 4px;
+        }
+        footer a:hover { color: var(--white); }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--white);
+            animation: blink 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.2; }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+        }
+        .reveal.in { opacity: 1; transform: none; }
+
+        .nav-link {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.25s var(--ease);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-link:hover { color: var(--white); }
+        .nav-link.active { color: var(--white); }
+
+        .live-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--white);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            padding: 3px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-3.5 flex justify-between items-center">
+        <span class="mono text-[11px] font-bold tracking-[0.18em] text-white">NELSON // CORE</span>
+        <nav class="flex items-center gap-4">
+            <a href="./projects.html" class="nav-link">Projects</a>
+            <a href="./bankapi.html" class="nav-link">BankAPI</a>
+        </nav>
+        <div class="mono text-[9px] text-neutral-400 bg-neutral-950 px-2.5 py-1 rounded line-box flex items-center gap-1.5">
+            <span class="pulse" style="width:5px;height:5px;"></span>
+            NODE_<span id="live-year">2026</span>
+        </div>
+    </div>
+</header>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section id="hero">
+    <div id="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200');"></div>
+
+    <div class="hero-content w-full max-w-lg mx-auto px-4 sm:px-5 pb-10 sm:pb-12">
+
+        <div class="section-label mb-5">
+            <span class="pulse"></span>
+            SYSTEM ACTIVE — PATH TO GLOBAL RELEVANCE
+        </div>
+
+        <h1 id="hero-title" class="mb-4">
+            Nelson<br>Asagwara
+        </h1>
+
+        <p class="text-[13px] text-neutral-400 font-light leading-relaxed mb-6">
+            Backend Engineer. Zero to deployed — Java, Spring Boot, PostgreSQL, Docker, AWS. Built from scratch. No shortcuts.
+        </p>
+
+        <div class="flex items-center gap-3">
+            <span class="live-badge">
+                <span class="pulse" style="width:5px;height:5px;"></span>
+                LIVE ON AWS
+            </span>
+            <span class="mono text-[9px] text-neutral-600">54.147.220.26:8080</span>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<main class="w-full max-w-lg mx-auto px-4 sm:px-5 flex flex-col gap-10 sm:gap-14 py-10 sm:py-14">
+
+
+    <!-- IDENTITY -->
+    <section class="reveal flex flex-col gap-5">
+
+        <div class="section-label">IDENTITY // NELSON ASAGWARA</div>
+
+        <div class="speech-card">
+            <p class="mono text-[9px] text-neutral-600 mb-3 uppercase tracking-widest">Backend &amp; DevOps Engineer</p>
+            <p class="text-[13px] leading-[1.8] text-neutral-200 font-light">
+                I am a Computer Science undergraduate focused on building robust, high-performance, and securely scaled backend systems. I don't just write code — I design the infrastructure that allows applications to scale globally.
+            </p>
+            <p class="text-[13px] leading-[1.8] text-neutral-400 font-light mt-4">
+                Starting from core computer science fundamentals, I have systematically scaled my expertise into enterprise architecture. My engineering philosophy centers on clean code, structural integrity, and production-grade reliability.
+            </p>
+            <p class="text-[13px] leading-[1.8] text-neutral-400 font-light mt-4">
+                From wiring up high-integrity REST APIs with Spring Boot and securing them with JWT Authentication, to persisting data across relational databases like PostgreSQL and wrapping full ecosystems inside Docker Compose containers, I build with production in mind. Taking my work all the way to the cloud, I deploy live, containerized environments on AWS EC2 to ensure maximum uptime and global availability.
+            </p>
+            <p class="text-[13px] leading-[1.8] text-neutral-300 font-light mt-4">
+                I bridge the gap between software logic and cloud infrastructure, building systems that don't just work — but survive at scale.
+            </p>
+        </div>
+
+        <div class="affirmation-card">
+            <div class="chip mb-3 pl-3">[TECH_STACK // WHAT I RUN]</div>
+            <div class="pl-3 flex flex-col gap-2">
+                <p class="text-[12px] text-neutral-300 font-light"><span class="mono text-[10px] text-neutral-600">LANGUAGES —</span> Java, SQL</p>
+                <p class="text-[12px] text-neutral-300 font-light"><span class="mono text-[10px] text-neutral-600">FRAMEWORKS —</span> Spring Boot, Spring Security (JWT), JPA/Hibernate</p>
+                <p class="text-[12px] text-neutral-300 font-light"><span class="mono text-[10px] text-neutral-600">DATABASES —</span> PostgreSQL, Maven</p>
+                <p class="text-[12px] text-neutral-300 font-light"><span class="mono text-[10px] text-neutral-600">DEVOPS &amp; CLOUD —</span> Docker, Docker Compose, AWS EC2</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- STATS -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">MISSION STATS // BY THE NUMBERS</div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Phases Complete</p>
+                <p class="text-2xl font-black">9</p>
+                <p class="mono text-[9px] text-neutral-500 mt-1">Java → AWS</p>
+            </div>
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Projects Built</p>
+                <p class="text-2xl font-black">6+</p>
+                <p class="mono text-[9px] text-neutral-500 mt-1">Console to Cloud</p>
+            </div>
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">API Endpoints</p>
+                <p class="text-2xl font-black">7</p>
+                <p class="mono text-[9px] text-neutral-500 mt-1">Live & Secured</p>
+            </div>
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Status</p>
+                <p class="text-2xl font-black">🟢</p>
+                <p class="mono text-[9px] text-neutral-500 mt-1">Deployed on EC2</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- JOURNEY PHASES -->
+    <section class="reveal flex flex-col gap-5">
+
+        <div class="section-label">THE JOURNEY // PHASE BY PHASE</div>
+
+        <div class="line-box rounded-xl overflow-hidden">
+
+            <div style="padding:18px 16px 6px; border-bottom:1px solid var(--border);">
+                <p class="chip mb-1">CURRICULUM — ZERO TO DEPLOYED</p>
+                <p class="text-[11px] text-neutral-400 font-light leading-relaxed mt-2">
+                    Every phase built on the last. No phase was skipped. Every concept was explained before it was coded.
+                </p>
+            </div>
+
+            <div style="padding:0 16px;">
+
+                <div class="phase-row">
+                    <span class="phase-index">01</span>
+                    <div class="phase-body">
+                        <h4>Core Java Fundamentals</h4>
+                        <p>Variables, conditionals, loops, methods, arrays. Built a calculator and number guessing game from scratch.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">02</span>
+                    <div class="phase-body">
+                        <h4>Object-Oriented Programming</h4>
+                        <p>Classes, objects, encapsulation, inheritance. Built a full Bank Account Management System.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">03</span>
+                    <div class="phase-body">
+                        <h4>Collections & Advanced Java</h4>
+                        <p>ArrayLists, HashMaps, Streams, Lambdas, Generics, Custom Exceptions. 4 mastery projects.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">04</span>
+                    <div class="phase-body">
+                        <h4>Spring Boot REST API</h4>
+                        <p>Built BankAPI — a full CRUD REST API with DTOs, custom exception handling, and PostgreSQL.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">05</span>
+                    <div class="phase-body">
+                        <h4>Docker & Containerization</h4>
+                        <p>Containerized the entire app with Docker Compose — Spring Boot + PostgreSQL running together.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">06</span>
+                    <div class="phase-body">
+                        <h4>JWT Authentication & Security</h4>
+                        <p>Built full auth system — BCrypt hashing, JWT tokens, Spring Security filter chain, protected routes.</p>
+                    </div>
+                </div>
+
+                <div class="phase-row">
+                    <span class="phase-index">07</span>
+                    <div class="phase-body">
+                        <h4>Production Polish & AWS Deployment</h4>
+                        <p>Input validation, proper HTTP status codes, structured responses. Deployed live to AWS EC2.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- FEATURED PROJECT -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">FEATURED PROJECT // BANKAPI</div>
+
+        <a href="./bankapi.html" class="project-card">
+            <div class="flex justify-between items-start mb-4">
+                <div class="mono text-[10px] text-neutral-600">[PROJECT_01]</div>
+                <span class="live-badge">
+                    <span class="pulse" style="width:5px;height:5px;"></span>
+                    LIVE
+                </span>
+            </div>
+            <h3 class="text-base font-bold mb-2">BankAPI</h3>
+            <p class="text-[12px] text-neutral-400 font-light leading-relaxed mb-4">
+                A production-grade secured REST API. Register, login with JWT, create bank accounts, deposit, withdraw. Running on AWS EC2 with PostgreSQL and Docker.
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <span class="chip">Java</span>
+                <span class="chip">Spring Boot</span>
+                <span class="chip">PostgreSQL</span>
+                <span class="chip">Docker</span>
+                <span class="chip">JWT</span>
+                <span class="chip">AWS EC2</span>
+            </div>
+            <div class="mt-4 pt-3 border-t" style="border-color:var(--border);">
+                <p class="mono text-[9px] text-neutral-600">VIEW FULL PROJECT →</p>
+            </div>
+        </a>
+
+        <a href="./projects.html" class="project-card" style="border-style:dashed;">
+            <div class="mono text-[10px] text-neutral-600 mb-2">[MORE_PROJECTS]</div>
+            <p class="text-[12px] text-neutral-400 font-light">View all projects — Java mastery projects, console apps, and more coming soon.</p>
+            <div class="mt-3">
+                <p class="mono text-[9px] text-neutral-600">VIEW ALL →</p>
+            </div>
+        </a>
+
+    </section>
+
+
+    <!-- STACK -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">TECH STACK // TOOLS MASTERED</div>
+
+        <div class="grid grid-cols-3 gap-2">
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">Java</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Core Language</p>
+            </div>
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">Spring Boot</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Framework</p>
+            </div>
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">PostgreSQL</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Database</p>
+            </div>
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">Docker</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Containers</p>
+            </div>
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">JWT</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Auth</p>
+            </div>
+            <div class="stat-card text-center">
+                <p class="text-[11px] font-semibold">AWS EC2</p>
+                <p class="mono text-[9px] text-neutral-600 mt-1">Cloud</p>
+            </div>
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5">
+
+        <div style="height:1px; background:var(--border); margin-bottom:20px;"></div>
+
+        <div class="flex justify-between items-center">
+            <span class="footer-sign">// TO BE CONTINUED...</span>
+            <div style="display:flex; gap:4px; align-items:center;">
+                <a href="https://github.com/NjayCMP-cell" target="_blank" rel="noopener">GH</a>
+            </div>
+        </div>
+
+        <p class="chip mt-4" style="letter-spacing:0.1em;">© <span id="footer-year">2026</span> NELSON ASAGWARA // ALL SYSTEMS ACTIVE</p>
+
+    </div>
+</footer>
+
+
+<script>
+(function () {
+    const y = new Date().getFullYear();
+    document.getElementById('live-year').textContent   = y;
+    document.getElementById('footer-year').textContent = y;
+})();
+
+/* Hero background cycling */
+(function () {
+    const bgs = [
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200',
+        'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1200'
+    ];
+    const bgEl = document.getElementById('hero-bg');
+    let idx = 0;
+    setInterval(() => {
+        bgEl.style.opacity = '0';
+        setTimeout(() => {
+            idx = (idx + 1) % bgs.length;
+            bgEl.style.backgroundImage = `url('${bgs[idx]}')`;
+            bgEl.style.opacity = '0.15';
+        }, 600);
+    }, 8000);
+})();
+
+/* Scroll reveal */
+(function () {
+    const els = document.querySelectorAll('.reveal');
+    const io  = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('in');
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.08 });
+    els.forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>

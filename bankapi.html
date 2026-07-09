@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BankAPI — Nelson Asagwara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --border: rgba(255,255,255,0.10);
+            --muted: rgba(255,255,255,0.35);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { background: var(--black); color: var(--white); scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--black); overflow-x: hidden; min-height: 100vh; }
+        .mono { font-family: 'Space Mono', monospace; }
+
+        header {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .back-link {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.25s var(--ease);
+            min-height: 44px;
+        }
+        .back-link:hover { color: var(--white); }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--white);
+            animation: blink 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.2; }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+        }
+        .reveal.in { opacity: 1; transform: none; }
+
+        .endpoint-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .method-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        .method-post { background: rgba(255,255,255,0.1); color: var(--white); }
+        .method-get  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
+
+        .module-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            transition: border-color 0.3s var(--ease);
+        }
+        .module-card:hover { border-color: rgba(255,255,255,0.3); }
+
+        .stat-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .live-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--white);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 4px;
+            padding: 3px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cta-btn {
+            display: block;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: var(--white);
+            color: var(--black);
+            padding: 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background 0.3s var(--ease), transform 0.3s var(--ease);
+        }
+        .cta-btn:hover { background: #e5e5e5; transform: translateY(-1px); }
+
+        /* Terminal */
+        .tab-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: transparent;
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: white; border-color: rgba(255,255,255,0.3); }
+        .tab-btn.active { color: black; background: white; border-color: white; }
+
+        .term-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: white;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .term-input:focus { border-color: rgba(255,255,255,0.35); }
+        .term-input::placeholder { color: rgba(255,255,255,0.2); }
+
+        .term-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .output-line {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .output-success { color: rgba(255,255,255,0.85); }
+        .output-error   { color: rgba(255,100,100,0.85); }
+        .output-muted   { color: rgba(255,255,255,0.3); }
+        .output-key     { color: rgba(255,255,255,0.5); }
+        .output-val     { color: rgba(255,255,255,0.9); }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 20px 0 calc(24px + env(safe-area-inset-bottom));
+        }
+        footer a {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.25s var(--ease);
+        }
+        footer a:hover { color: var(--white); }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-3.5 flex justify-between items-center">
+        <a href="./index.html" class="back-link">← Core Feed</a>
+        <span class="mono text-[11px] font-bold tracking-[0.18em] text-white">BANKAPI // ARCHIVE</span>
+        <nav class="hidden sm:flex gap-4">
+            <a href="#overview" class="back-link">Overview</a>
+            <a href="#endpoints" class="back-link">Endpoints</a>
+            <a href="#terminal" class="back-link">Terminal</a>
+            <a href="#stack" class="back-link">Stack</a>
+        </nav>
+    </div>
+</header>
+
+
+<main class="w-full max-w-lg mx-auto px-4 sm:px-5 flex flex-col gap-10 sm:gap-14 py-10 sm:py-14">
+
+
+    <!-- HERO -->
+    <section id="overview" class="space-y-6 pt-2">
+
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            PROJECT_01 — LIVE ON AWS
+        </div>
+
+        <h1 class="text-[2rem] leading-[1.1] font-black tracking-tight">BankAPI</h1>
+
+        <p class="text-sm text-neutral-400 font-light leading-relaxed">
+            A production-grade secured banking REST API. Built from scratch — no tutorials, no copy-paste. Every line understood, every concept explained before it was coded.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="live-badge">
+                <span class="pulse" style="width:5px;height:5px;"></span>
+                LIVE
+            </span>
+            <a href="http://54.147.220.26:8080/auth/register"
+               target="_blank" rel="noopener"
+               class="mono text-[9px] text-neutral-500 hover:text-white transition-colors"
+               style="letter-spacing:0.08em;">
+                54.147.220.26:8080 ↗
+            </a>
+        </div>
+
+        <!-- Stat strip -->
+        <div class="grid grid-cols-3 gap-2">
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Endpoints</p>
+                <p class="text-lg font-black">7</p>
+            </div>
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Auth</p>
+                <p class="text-lg font-black">JWT</p>
+            </div>
+            <div class="stat-card">
+                <p class="mono text-[9px] text-neutral-600 mb-1 uppercase">Deploy</p>
+                <p class="text-lg font-black">EC2</p>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- WHAT IT DOES -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">WHAT IT DOES</div>
+
+        <div class="module-card">
+            <div class="mono text-[10px] text-neutral-600 mb-4">[SYSTEM_OVERVIEW]</div>
+            <p class="text-[13px] leading-[1.8] text-neutral-200 font-light">
+                BankAPI is a fully secured REST API that handles user authentication and bank account management. Users register and receive a JWT token on login. That token is required to access all account endpoints — creating accounts, checking balances, depositing, and withdrawing.
+            </p>
+            <p class="text-[13px] leading-[1.8] text-neutral-400 font-light mt-3">
+                The entire system runs in Docker containers — Spring Boot app and PostgreSQL database — deployed on an AWS EC2 instance accessible from anywhere in the world.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- ENDPOINTS -->
+    <section id="endpoints" class="reveal flex flex-col gap-4">
+
+        <div class="section-label">API ENDPOINTS // FULL REFERENCE</div>
+
+        <div class="flex flex-col gap-3">
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-post">POST</span>
+                    <span class="mono text-[11px] text-white">/auth/register</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Register a new user. Returns 201 Created. Validates username and password — rejects duplicates and weak passwords.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PUBLIC — NO TOKEN REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-post">POST</span>
+                    <span class="mono text-[11px] text-white">/auth/login</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Login with credentials. Returns structured JSON with JWT token: <span class="mono text-[11px] text-neutral-300">{"token": "eyJ..."}</span></p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PUBLIC — NO TOKEN REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-post">POST</span>
+                    <span class="mono text-[11px] text-white">/accounts</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Create a new bank account with owner name and initial balance. Returns full account details.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PROTECTED — JWT REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-get">GET</span>
+                    <span class="mono text-[11px] text-white">/accounts/{id}</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Retrieve account details by ID. Returns 404 if account not found.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PROTECTED — JWT REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-get">GET</span>
+                    <span class="mono text-[11px] text-white">/accounts/{id}/balance</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Check current balance for a specific account.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PROTECTED — JWT REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-post">POST</span>
+                    <span class="mono text-[11px] text-white">/accounts/{id}/deposit</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Deposit funds into an account. Rejects negative amounts.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PROTECTED — JWT REQUIRED</p>
+                </div>
+            </div>
+
+            <div class="endpoint-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="method-badge method-post">POST</span>
+                    <span class="mono text-[11px] text-white">/accounts/{id}/withdraw</span>
+                </div>
+                <p class="text-[12px] text-neutral-400 font-light">Withdraw funds. Returns 400 if insufficient balance.</p>
+                <div class="mt-3 pt-3 border-t" style="border-color:var(--border);">
+                    <p class="mono text-[9px] text-neutral-600">PROTECTED — JWT REQUIRED</p>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- TECH STACK -->
+    <section id="stack" class="reveal flex flex-col gap-4">
+
+        <div class="section-label">TECH STACK // HOW IT'S BUILT</div>
+
+        <div class="flex flex-col gap-3">
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_01 — LANGUAGE & FRAMEWORK]</div>
+                <h3 class="text-sm font-semibold mb-2">Java 21 + Spring Boot</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Core language and framework. Spring Boot handles the REST layer, dependency injection, and JPA integration.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_02 — DATABASE]</div>
+                <h3 class="text-sm font-semibold mb-2">PostgreSQL + Spring Data JPA</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Persistent storage for users and bank accounts. JPA handles ORM — entities map directly to database tables.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_03 — SECURITY]</div>
+                <h3 class="text-sm font-semibold mb-2">Spring Security + JWT + BCrypt</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Passwords hashed with BCrypt. JWT tokens generated on login and validated on every protected request via a custom filter chain.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_04 — INFRASTRUCTURE]</div>
+                <h3 class="text-sm font-semibold mb-2">Docker + AWS EC2</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">App and database containerized with Docker Compose. Deployed on an Ubuntu EC2 instance. Publicly accessible at port 8080.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- LIVE TERMINAL -->
+    <section id="terminal" class="reveal flex flex-col gap-4">
+
+        <div class="section-label">LIVE TERMINAL // TEST THE API</div>
+
+        <div style="border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#050505;">
+
+            <!-- Terminal top bar -->
+            <div style="padding:10px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:6px;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:#333;"></span>
+                    <span style="width:10px;height:10px;border-radius:50%;background:#333;"></span>
+                    <span style="width:10px;height:10px;border-radius:50%;background:#333;"></span>
+                </div>
+                <span class="mono text-[9px] text-neutral-600">bankapi@54.147.220.26:8080</span>
+                <span class="pulse" style="width:5px;height:5px;"></span>
+            </div>
+
+            <!-- Endpoint selector -->
+            <div style="padding:14px; border-bottom:1px solid var(--border);">
+                <p class="mono text-[9px] text-neutral-600 mb-2 uppercase tracking-widest">Select Endpoint</p>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;" id="endpoint-tabs">
+                    <button onclick="selectEndpoint('register')" class="tab-btn active" data-ep="register">POST /register</button>
+                    <button onclick="selectEndpoint('login')"    class="tab-btn"        data-ep="login">POST /login</button>
+                    <button onclick="selectEndpoint('create')"   class="tab-btn"        data-ep="create">POST /accounts</button>
+                    <button onclick="selectEndpoint('deposit')"  class="tab-btn"        data-ep="deposit">POST /deposit</button>
+                    <button onclick="selectEndpoint('withdraw')" class="tab-btn"        data-ep="withdraw">POST /withdraw</button>
+                    <button onclick="selectEndpoint('balance')"  class="tab-btn"        data-ep="balance">GET /balance</button>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div style="padding:14px; border-bottom:1px solid var(--border);" id="input-area">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Send button -->
+            <div style="padding:10px 14px; border-bottom:1px solid var(--border);">
+                <button onclick="sendRequest()" id="send-btn"
+                    style="width:100%; font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+                           letter-spacing:0.12em; text-transform:uppercase; background:white; color:black;
+                           border:none; border-radius:6px; padding:10px; cursor:pointer;
+                           transition:background 0.2s;">
+                    SEND REQUEST →
+                </button>
+            </div>
+
+            <!-- Output area -->
+            <div style="padding:14px; min-height:120px;" id="output-area">
+                <p class="mono text-[10px] text-neutral-700">> waiting for request...</p>
+            </div>
+
+        </div>
+
+        <p class="mono text-[9px] text-neutral-700" style="letter-spacing:0.1em;">// Hitting the live API at 54.147.220.26:8080 — real responses, real data</p>
+
+    </section>
+
+
+    <!-- GITHUB LINK -->
+    <section class="reveal flex flex-col gap-3">
+        <a href="https://github.com/NjayCMP-cell/bankapi"
+           target="_blank" rel="noopener"
+           class="cta-btn">
+            VIEW SOURCE ON GITHUB →
+        </a>
+        <a href="./projects.html" class="cta-btn" style="background:transparent; color:var(--white); border:1px solid var(--border);">
+            ← ALL PROJECTS
+        </a>
+    </section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+<footer>
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5">
+        <div style="height:1px; background:var(--border); margin-bottom:20px;"></div>
+        <div class="flex justify-between items-center">
+            <span class="mono text-[11px] font-bold tracking-[0.18em] text-white">// BANKAPI</span>
+            <a href="./index.html">← CORE FEED</a>
+        </div>
+        <p class="mono text-[10px] text-neutral-600 mt-4" style="letter-spacing:0.1em;">© <span id="footer-year">2026</span> NELSON ASAGWARA</p>
+    </div>
+</footer>
+
+
+<script>
+const BASE = 'http://54.147.220.26:8080';
+let currentEndpoint = 'register';
+let savedToken = '';
+let savedAccountId = '';
+
+const endpoints = {
+    register: {
+        method: 'POST', path: '/auth/register', auth: false,
+        fields: [
+            { id: 'username', label: 'Username', placeholder: 'e.g. nelson' },
+            { id: 'password', label: 'Password (min 6 chars)', placeholder: 'e.g. secret123' }
+        ]
+    },
+    login: {
+        method: 'POST', path: '/auth/login', auth: false,
+        fields: [
+            { id: 'username', label: 'Username', placeholder: 'e.g. nelson' },
+            { id: 'password', label: 'Password', placeholder: 'e.g. secret123' }
+        ]
+    },
+    create: {
+        method: 'POST', path: '/accounts', auth: true,
+        fields: [
+            { id: 'ownerName',       label: 'Owner Name',      placeholder: 'e.g. Nelson Asagwara' },
+            { id: 'initialBalance',  label: 'Initial Balance', placeholder: 'e.g. 1000' }
+        ]
+    },
+    deposit: {
+        method: 'POST', path: '/accounts/{id}/deposit', auth: true,
+        fields: [
+            { id: 'accountId', label: 'Account ID', placeholder: 'paste account id here' },
+            { id: 'amount',    label: 'Amount',     placeholder: 'e.g. 500' }
+        ]
+    },
+    withdraw: {
+        method: 'POST', path: '/accounts/{id}/withdraw', auth: true,
+        fields: [
+            { id: 'accountId', label: 'Account ID', placeholder: 'paste account id here' },
+            { id: 'amount',    label: 'Amount',     placeholder: 'e.g. 200' }
+        ]
+    },
+    balance: {
+        method: 'GET', path: '/accounts/{id}/balance', auth: true,
+        fields: [
+            { id: 'accountId', label: 'Account ID', placeholder: 'paste account id here' }
+        ]
+    }
+};
+
+function selectEndpoint(key) {
+    currentEndpoint = key;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-ep="${key}"]`).classList.add('active');
+    renderInputs();
+    clearOutput();
+}
+
+function renderInputs() {
+    const ep = endpoints[currentEndpoint];
+    const area = document.getElementById('input-area');
+    let html = '';
+
+    if (ep.auth) {
+        html += `<div style="margin-bottom:10px;">`;
+        html += `<span class="term-label">JWT Token (auto-filled after login)</span>`;
+        html += `<input class="term-input" id="field-token" placeholder="paste token or login first" value="${savedToken}">`;
+        html += `</div>`;
+    }
+
+    ep.fields.forEach(f => {
+        const prefill = (f.id === 'accountId' && savedAccountId) ? savedAccountId : '';
+        html += `<div style="margin-bottom:10px;">`;
+        html += `<span class="term-label">${f.label}</span>`;
+        html += `<input class="term-input" id="field-${f.id}" placeholder="${f.placeholder}" value="${prefill}">`;
+        html += `</div>`;
+    });
+
+    area.innerHTML = html;
+}
+
+function clearOutput() {
+    document.getElementById('output-area').innerHTML =
+        '<p class="output-line output-muted">> waiting for request...</p>';
+}
+
+function printOutput(lines) {
+    document.getElementById('output-area').innerHTML = lines.join('');
+}
+
+function formatJSON(obj) {
+    return JSON.stringify(obj, null, 2)
+        .replace(/"(\w+)":/g, '<span class="output-key">"$1":</span>')
+        .replace(/: "([^"]*)"/g, ': <span class="output-val">"$1"</span>')
+        .replace(/: (\d+(\.\d+)?)/g, ': <span class="output-val">$1</span>');
+}
+
+async function sendRequest() {
+    const ep = endpoints[currentEndpoint];
+    const btn = document.getElementById('send-btn');
+    btn.textContent = 'SENDING...';
+    btn.disabled = true;
+
+    printOutput([`<p class="output-line output-muted">> ${ep.method} ${ep.path}</p>`,
+                 `<p class="output-line output-muted">> connecting to 54.147.220.26:8080...</p>`]);
+
+    try {
+        let body = {};
+        let url  = BASE + ep.path;
+        const headers = { 'Content-Type': 'application/json' };
+
+        if (ep.auth) {
+            const token = document.getElementById('field-token')?.value.trim();
+            if (!token) { throw new Error('Token required. Login first to get a token.'); }
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        ep.fields.forEach(f => {
+            const val = document.getElementById(`field-${f.id}`)?.value.trim();
+            if (f.id === 'accountId') {
+                url = url.replace('{id}', val);
+            } else if (f.id === 'amount' || f.id === 'initialBalance') {
+                body[f.id] = parseFloat(val);
+            } else {
+                body[f.id] = val;
+            }
+        });
+
+        const options = { method: ep.method, headers };
+        if (ep.method === 'POST') options.body = JSON.stringify(body);
+
+        const res  = await fetch(url, options);
+        const text = await res.text();
+        let parsed;
+        try { parsed = JSON.parse(text); } catch { parsed = text; }
+
+        const isOk = res.ok;
+
+        // Auto-save token after login
+        if (currentEndpoint === 'login' && isOk && parsed.token) {
+            savedToken = parsed.token;
+        }
+        // Auto-save account id after create
+        if (currentEndpoint === 'create' && isOk && parsed.id) {
+            savedAccountId = parsed.id;
+        }
+
+        const statusColor = isOk ? 'output-success' : 'output-error';
+        const formatted   = typeof parsed === 'object' ? formatJSON(parsed) : parsed;
+
+        printOutput([
+            `<p class="output-line output-muted">> ${ep.method} ${url.replace(BASE,'')}</p>`,
+            `<p class="output-line ${statusColor}">> STATUS: ${res.status} ${res.statusText}</p>`,
+            `<p class="output-line output-muted">> RESPONSE:</p>`,
+            `<pre class="output-line ${statusColor}" style="margin-top:6px;">${formatted}</pre>`,
+            isOk && currentEndpoint === 'login'
+                ? `<p class="output-line output-muted" style="margin-top:8px;">> token saved — switch to a protected endpoint to use it</p>`
+                : '',
+            isOk && currentEndpoint === 'create'
+                ? `<p class="output-line output-muted" style="margin-top:8px;">> account id saved — switch to deposit/withdraw/balance to use it</p>`
+                : ''
+        ]);
+
+    } catch (err) {
+        printOutput([
+            `<p class="output-line output-error">> ERROR: ${err.message}</p>`,
+            `<p class="output-line output-muted">> check that the API server is running</p>`
+        ]);
+    }
+
+    btn.textContent = 'SEND REQUEST →';
+    btn.disabled = false;
+}
+
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+// Init
+selectEndpoint('register');
+
+(function () {
+    const els = document.querySelectorAll('.reveal');
+    const io  = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.08 });
+    els.forEach(el => io.observe(el));
+})();
+</script>
+
+</body>
+</html>
