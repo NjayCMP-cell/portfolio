@@ -445,7 +445,7 @@
                     <span style="width:10px;height:10px;border-radius:50%;background:#333;"></span>
                     <span style="width:10px;height:10px;border-radius:50%;background:#333;"></span>
                 </div>
-                <span class="mono text-[9px] text-neutral-600">bankapi@54.147.220.26:8080</span>
+                <span class="mono text-[9px] text-neutral-600">bankapi@ngrok — live</span>
                 <span class="pulse" style="width:5px;height:5px;"></span>
             </div>
 
@@ -485,7 +485,7 @@
 
         </div>
 
-        <p class="mono text-[9px] text-neutral-700" style="letter-spacing:0.1em;">// Hitting the live API at 54.147.220.26:8080 — real responses, real data</p>
+        <p class="mono text-[9px] text-neutral-700" style="letter-spacing:0.1em;">// Hitting the live API via ngrok — real responses, real data</p>
 
     </section>
 
@@ -520,7 +520,7 @@
 
 
 <script>
-const BASE = 'http://54.147.220.26:8080';
+const BASE = 'https://claim-rise-slicer.ngrok-free.app';
 let currentEndpoint = 'register';
 let savedToken = '';
 let savedAccountId = '';
@@ -623,7 +623,7 @@ async function sendRequest() {
     btn.disabled = true;
 
     printOutput([`<p class="output-line output-muted">> ${ep.method} ${ep.path}</p>`,
-                 `<p class="output-line output-muted">> connecting to 54.147.220.26:8080...</p>`]);
+                 `<p class="output-line output-muted">> connecting to live API...</p>`]);
 
     try {
         let body = {};
