@@ -628,7 +628,7 @@ async function sendRequest() {
     try {
         let body = {};
         let url  = BASE + ep.path;
-        const headers = { 'Content-Type': 'application/json' };
+        const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
 
         if (ep.auth) {
             const token = document.getElementById('field-token')?.value.trim();
