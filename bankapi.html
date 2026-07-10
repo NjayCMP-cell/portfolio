@@ -485,7 +485,7 @@
 
         </div>
 
-        <p class="mono text-[9px] text-neutral-700" style="letter-spacing:0.1em;">// Hitting the live API via ngrok — real responses, real data</p>
+        <p class="mono text-[9px] text-neutral-700" style="letter-spacing:0.1em;">// Hitting the live API on AWS EC2 — real responses, real data</p>
 
     </section>
 
@@ -520,7 +520,7 @@
 
 
 <script>
-const BASE = 'https://claim-rise-slicer.ngrok-free.app';
+const BASE = 'http://54.147.220.26:8080';
 let currentEndpoint = 'register';
 let savedToken = '';
 let savedAccountId = '';
@@ -628,7 +628,7 @@ async function sendRequest() {
     try {
         let body = {};
         let url  = BASE + ep.path;
-        const headers = { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' };
+        const headers = { 'Content-Type': 'application/json' };
 
         if (ep.auth) {
             const token = document.getElementById('field-token')?.value.trim();
