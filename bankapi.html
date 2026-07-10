@@ -253,7 +253,7 @@
         <h1 class="text-[2rem] leading-[1.1] font-black tracking-tight">BankAPI</h1>
 
         <p class="text-sm text-neutral-400 font-light leading-relaxed">
-            A secured banking REST API built as part of a structured self-teaching journey. Every concept was learned before it was coded — no copy-paste, no skipping steps.
+            A secured banking REST API built as part of a structured self-teaching journey. Every concept was learned before it was coded, no copy-paste, no skipping steps.
         </p>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -293,8 +293,80 @@
                 BankAPI is a secured REST API built as part of a self-directed backend engineering curriculum. It handles user registration, JWT-based login, and bank account management — create accounts, check balances, deposit, and withdraw.
             </p>
             <p class="text-[13px] leading-[1.8] text-neutral-400 font-light mt-3">
-                Built concept by concept — starting from plain Java, through Spring Boot, PostgreSQL, Docker, and finally deployed live on AWS EC2. Every layer was understood before it was added.
+                Built concept by concept, starting from plain Java, through Spring Boot, PostgreSQL, Docker, and finally deployed live on AWS EC2. Every layer was understood before it was added.
             </p>
+        </div>
+
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+    <section class="reveal flex flex-col gap-4">
+
+        <div class="section-label">HOW IT WORKS // CONCEPTS EXPLAINED</div>
+
+        <div class="flex flex-col gap-3">
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[REST API]</div>
+                <h3 class="text-sm font-semibold mb-2">REST & HTTP</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">REST is an architectural style for building APIs over HTTP. The client sends a request to a URL with a method. GET retrieves, POST creates or acts. The server processes it and returns a response with a status code. In BankAPI, <span class="text-neutral-300">POST /auth/login</span> returns 200 with a token, <span class="text-neutral-300">POST /accounts</span> returns 201 when an account is created, and <span class="text-neutral-300">GET /accounts/{id}</span> returns 404 if the account doesn't exist.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[SPRING BOOT]</div>
+                <h3 class="text-sm font-semibold mb-2">Dependency Injection & Annotations</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Spring Boot is a framework that manages the wiring of your application. Instead of manually creating objects, you annotate classes and Spring creates and injects them for you. <span class="text-neutral-300">@RestController</span> marks a class as an HTTP handler. <span class="text-neutral-300">@Service</span> marks business logic. <span class="text-neutral-300">@Repository</span> marks database access. Spring connects them automatically at startup. BankAccountController never manually creates BankAccountService, Spring injects it.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[CLEAN ARCHITECTURE]</div>
+                <h3 class="text-sm font-semibold mb-2">Layered Design</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">BankAPI is split into three layers. The <span class="text-neutral-300">Controller</span> receives HTTP requests and returns responses, it knows nothing about the database. The <span class="text-neutral-300">Service</span> holds all business logic: deposit rules, withdrawal checks, duplicate username prevention. The <span class="text-neutral-300">Repository</span> talks to PostgreSQL via JPA. Each layer only talks to the one below it. This separation means you can change the database without touching the controller.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[JPA & ORM]</div>
+                <h3 class="text-sm font-semibold mb-2">Object Relational Mapping</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">ORM bridges Java objects and database tables. The <span class="text-neutral-300">BankAccount</span> class is annotated with <span class="text-neutral-300">@Entity</span> — JPA automatically creates a <span class="text-neutral-300">bank_accounts</span> table from it. <span class="text-neutral-300">@Id</span> marks the primary key. <span class="text-neutral-300">BankAccountRepository</span> extends <span class="text-neutral-300">JpaRepository&lt;BankAccount, Long&gt;</span> which provides save(), findById(), and findAll() with no SQL written. Data persists across restarts because it lives in PostgreSQL, not memory.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[DTOs]</div>
+                <h3 class="text-sm font-semibold mb-2">Data Transfer Objects</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">A DTO is a plain class that acts as a contract between the client and the API. <span class="text-neutral-300">AccountRequestDTO</span> defines exactly what fields the client must send when creating an account: ownerName and initialBalance. <span class="text-neutral-300">AccountResponseDTO</span> defines exactly what the client gets back: id, ownerName, balance. The <span class="text-neutral-300">BankAccount</span> entity itself is never sent to the client, so internal fields like database IDs and timestamps stay hidden.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[JWT]</div>
+                <h3 class="text-sm font-semibold mb-2">JSON Web Token Authentication</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">After a successful login, <span class="text-neutral-300">JwtUtil</span> generates a signed token containing the username and an expiry time. The client stores this token and sends it on every protected request inside the <span class="text-neutral-300">Authorization: Bearer eyJ...</span> header. <span class="text-neutral-300">JwtFilter</span> intercepts every incoming request, extracts the token, validates the signature, and sets the authenticated user in Spring's security context. No session is stored on the server. The token itself carries the identity.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[BCRYPT]</div>
+                <h3 class="text-sm font-semibold mb-2">Password Hashing</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">When a user registers, <span class="text-neutral-300">AuthService</span> passes the password through <span class="text-neutral-300">BCryptPasswordEncoder</span> before saving it to the database. BCrypt is a one-way algorithm. The stored value looks like <span class="text-neutral-300">$2a$10$xyz...</span> and cannot be reversed. On login, BCrypt hashes the incoming password and compares it to the stored hash. If they match, authentication succeeds. The raw password is never stored anywhere.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[CUSTOM EXCEPTIONS]</div>
+                <h3 class="text-sm font-semibold mb-2">Structured Error Handling</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed"><span class="text-neutral-300">AccountNotFoundException</span> is thrown by the service when a requested account ID doesn't exist in the database. <span class="text-neutral-300">InsufficientFundsException</span> is thrown when a withdrawal amount exceeds the current balance. Both extend <span class="text-neutral-300">RuntimeException</span>. <span class="text-neutral-300">GlobalExceptionHandler</span> is annotated with <span class="text-neutral-300">@RestControllerAdvice</span>. It catches these exceptions across the entire application and returns a clean JSON error body with the correct HTTP status code instead of a raw Spring error page.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[DOCKER]</div>
+                <h3 class="text-sm font-semibold mb-2">Containerization</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">A container is an isolated environment that packages the app and all its dependencies together. The <span class="text-neutral-300">Dockerfile</span> defines how to build the Spring Boot image: copy the JAR, set the entry point. <span class="text-neutral-300">docker-compose.yml</span> defines two services: <span class="text-neutral-300">app</span> (the Spring Boot container) and <span class="text-neutral-300">postgres</span> (the database container). They run on the same Docker network so the app can reach the database using the service name as a hostname. One command, <span class="text-neutral-300">docker-compose up</span>, starts the entire system.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-2">[AWS EC2]</div>
+                <h3 class="text-sm font-semibold mb-2">Cloud Deployment</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">EC2 is a virtual Linux server running in an AWS data center. The instance runs Ubuntu, has Docker installed, and hosts the Docker Compose stack. An <span class="text-neutral-300">Elastic IP</span> is attached so the public address never changes on restart. Port 8080 is opened in the EC2 security group so external traffic can reach the API. The entire stack, Spring Boot app and PostgreSQL, runs inside containers on this single instance.</p>
+            </div>
+
         </div>
 
     </section>
@@ -399,25 +471,43 @@
             <div class="module-card">
                 <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_01 — LANGUAGE & FRAMEWORK]</div>
                 <h3 class="text-sm font-semibold mb-2">Java 21 + Spring Boot</h3>
-                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Core language and framework. Spring Boot handles the REST layer, dependency injection, and JPA integration.</p>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Core language and framework. Spring Boot handles the REST layer, dependency injection, and JPA integration. Maven manages dependencies and builds the JAR.</p>
             </div>
 
             <div class="module-card">
-                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_02 — DATABASE]</div>
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_02 — ARCHITECTURE]</div>
+                <h3 class="text-sm font-semibold mb-2">Clean Layered Architecture</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Controller layer handles HTTP. Service layer holds business logic. Repository layer talks to the database. Each layer has one job and doesn't cross into another.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_03 — DATA TRANSFER]</div>
+                <h3 class="text-sm font-semibold mb-2">DTOs (Data Transfer Objects)</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">AccountRequestDTO controls what data comes in. AccountResponseDTO controls what data goes out. The database entity is never exposed directly to the client.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_04 — DATABASE]</div>
                 <h3 class="text-sm font-semibold mb-2">PostgreSQL + Spring Data JPA</h3>
-                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Persistent storage for users and bank accounts. JPA handles ORM — entities map directly to database tables.</p>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Persistent storage for users and bank accounts. JPA handles ORM, Java objects map directly to database tables. Data survives restarts.</p>
             </div>
 
             <div class="module-card">
-                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_03 — SECURITY]</div>
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_05 — SECURITY]</div>
                 <h3 class="text-sm font-semibold mb-2">Spring Security + JWT + BCrypt</h3>
-                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Passwords hashed with BCrypt. JWT tokens generated on login and validated on every protected request via a custom filter chain.</p>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">Passwords hashed with BCrypt before storage. JWT tokens generated on login and validated on every protected request via a custom filter chain. Public and protected routes configured separately.</p>
             </div>
 
             <div class="module-card">
-                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_04 — INFRASTRUCTURE]</div>
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_06 — ERROR HANDLING]</div>
+                <h3 class="text-sm font-semibold mb-2">Custom Exceptions + Global Handler</h3>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">AccountNotFoundException and InsufficientFundsException replace generic errors. A GlobalExceptionHandler catches them and returns clean structured JSON responses with correct HTTP status codes: 400, 404, 409.</p>
+            </div>
+
+            <div class="module-card">
+                <div class="mono text-[10px] text-neutral-600 mb-3">[LAYER_07 — INFRASTRUCTURE]</div>
                 <h3 class="text-sm font-semibold mb-2">Docker + AWS EC2</h3>
-                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">App and database containerized with Docker Compose. Deployed on an Ubuntu EC2 instance. Publicly accessible at port 8080.</p>
+                <p class="text-[12px] text-neutral-400 font-light leading-relaxed">App and database containerized with Docker Compose. Both run as isolated containers on the same network. Deployed on an Ubuntu EC2 instance with an Elastic IP for a permanent public address.</p>
             </div>
 
         </div>
@@ -484,13 +574,8 @@
     </section>
 
 
-    <!-- GITHUB LINK -->
+    <!-- BACK LINK -->
     <section class="reveal flex flex-col gap-3">
-        <a href="https://github.com/NjayCMP-cell/bankapi"
-           target="_blank" rel="noopener"
-           class="cta-btn">
-            VIEW SOURCE ON GITHUB →
-        </a>
         <a href="./projects.html" class="cta-btn" style="background:transparent; color:var(--white); border:1px solid var(--border);">
             ← ALL PROJECTS
         </a>
