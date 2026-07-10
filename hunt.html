@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>// CLASSIFIED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --black: #000000;
+            --white: #ffffff;
+            --border: rgba(255,255,255,0.10);
+            --muted: rgba(255,255,255,0.35);
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { background: var(--black); color: var(--white); scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--black); overflow-x: hidden; min-height: 100vh; }
+        .mono { font-family: 'Space Mono', monospace; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.15; }
+        }
+        @keyframes slowblink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        .blink       { animation: blink 1.6s ease-in-out infinite; }
+        .blink-slow  { animation: slowblink 3s ease-in-out infinite; }
+        .blink-fast  { animation: blink 0.9s ease-in-out infinite; }
+
+        .clue-word {
+            display: inline;
+            cursor: default;
+            font-weight: 700;
+            color: var(--white);
+        }
+        .decoy-word {
+            display: inline;
+            cursor: default;
+            color: rgba(255,255,255,0.55);
+        }
+
+        /* STAGE PANELS */
+        .stage {
+            display: none;
+            animation: fadeIn 0.7s var(--ease) forwards;
+        }
+        .stage.active { display: block; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s var(--ease);
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-box {
+            background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 16px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 420px;
+            transform: translateY(20px);
+            transition: transform 0.35s var(--ease);
+        }
+        .modal-overlay.open .modal-box { transform: none; }
+
+        /* OPTION BUTTONS */
+        .option-btn {
+            width: 100%;
+            text-align: left;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            padding: 13px 16px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+        .option-btn:hover { border-color: rgba(255,255,255,0.35); color: white; background: rgba(255,255,255,0.06); }
+        .option-btn.correct { border-color: white; color: white; background: rgba(255,255,255,0.1); }
+        .option-btn.wrong   { border-color: rgba(255,80,80,0.5); color: rgba(255,80,80,0.8); }
+
+        /* STORY CARD */
+        .story-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px 20px;
+            background: rgba(255,255,255,0.02);
+            line-height: 2;
+            font-size: 13px;
+            color: rgba(255,255,255,0.75);
+            font-weight: 300;
+        }
+        .story-card p { margin-bottom: 16px; }
+        .story-card p:last-child { margin-bottom: 0; }
+
+        /* FIND CLUE HINT */
+        .hint-bar {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+            padding: 10px 0 4px;
+        }
+
+        /* WRONG ANSWER SHAKE */
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20%     { transform: translateX(-6px); }
+            40%     { transform: translateX(6px); }
+            60%     { transform: translateX(-4px); }
+            80%     { transform: translateX(4px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+
+        /* WELCOME SCREEN */
+        #welcome-screen {
+            display: none;
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+            animation: fadeIn 1s var(--ease) forwards;
+        }
+        #welcome-screen.show { display: flex; }
+
+        /* PLAN PAGE */
+        #plan-page {
+            display: none;
+            animation: fadeIn 0.8s var(--ease) forwards;
+        }
+        #plan-page.show { display: block; }
+
+        .plan-phase {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            margin-bottom: 14px;
+        }
+        .plan-phase h3 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .plan-phase p, .plan-phase li {
+            font-size: 12px;
+            line-height: 1.85;
+            color: rgba(255,255,255,0.55);
+            font-weight: 300;
+        }
+        .plan-phase ul { padding-left: 16px; margin-top: 6px; }
+        .plan-phase li { margin-bottom: 4px; }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .pulse {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--white);
+            animation: blink 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     STAGE 1 — Age Question
+══════════════════════════════════════ -->
+<div id="stage-1" class="stage active">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6 min-h-screen justify-center">
+
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_01 // INITIALIZING
+        </div>
+
+        <h1 class="text-[1.6rem] font-black tracking-tight leading-tight">
+            You found something.<br>
+            <span class="text-neutral-500">Let's see if you know him.</span>
+        </h1>
+
+        <p class="text-[13px] text-neutral-500 font-light leading-relaxed">
+            A sequence has been unlocked. Answer correctly and it continues. Answer wrong and it ends here.
+        </p>
+
+        <button onclick="openModal('modal-1')"
+            class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">
+            BEGIN SEQUENCE →
+        </button>
+
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     STAGES 2–6 placeholder (Batch 2+)
+══════════════════════════════════════ -->
+<!-- STAGE 2 — First Kiss Story / NJ clue -->
+<div id="stage-2" class="stage">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6">
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_02 // MEMORY UNLOCKED
+        </div>
+        <h2 class="text-[1.4rem] font-black tracking-tight leading-tight">A story is loading.<br><span class="text-neutral-500">Find what matters.</span></h2>
+        <div class="hint-bar">// something in this story is blinking for a reason</div>
+        <div class="story-card">
+            <p>It was one of those <span class="decoy-word blink-slow">ordinary</span> afternoons that somehow refused to stay ordinary. The air was <span class="decoy-word blink">warm</span> and the world outside felt very far away. He had been <span class="decoy-word blink-fast">nervous</span> all day, rehearsing nothing in particular, just existing in that strange space between wanting something and not knowing how to reach for it.</p>
+            <p>She was <span class="decoy-word blink-slow">laughing</span> at something he said, the kind of laugh that makes a person feel like they invented <span class="decoy-word blink">humor</span> just for that moment. He noticed the way she tucked her hair behind her ear. He noticed the <span class="decoy-word blink-fast">quiet</span> between them that felt louder than anything else.</p>
+            <p>And then, without a plan, without a <span class="decoy-word blink">script</span>, two <span class="decoy-word blink-slow">souls</span> with matching initials <span class="clue-word blink" style="color:white;letter-spacing:0.12em;">NJ</span> found each other in a moment that neither of them would ever fully explain to anyone else. It just <span class="decoy-word blink-fast">happened</span>. The way real things always do.</p>
+            <p>He remembered everything about that moment. The <span class="decoy-word blink">sound</span>, the <span class="decoy-word blink-slow">stillness</span>, the way <span class="decoy-word blink-fast">time</span> seemed to pause and take a breath. He remembered what she was wearing. He will always remember what she was wearing.</p>
+        </div>
+        <button onclick="openModal('modal-2')" class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">ANSWER THE QUESTION →</button>
+    </div>
+</div>
+
+<!-- STAGE 3 — Valentine Story / August 11 clue -->
+<div id="stage-3" class="stage">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6">
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_03 // ANOTHER MEMORY
+        </div>
+        <h2 class="text-[1.4rem] font-black tracking-tight leading-tight">Still going.<br><span class="text-neutral-500">Read carefully.</span></h2>
+        <div class="hint-bar">// the clue is hiding in plain sight</div>
+        <div class="story-card">
+            <p><span class="decoy-word blink-slow">February</span> has a way of making people <span class="decoy-word blink">brave</span>. He had been <span class="decoy-word blink-fast">planning</span> it for weeks, turning the idea over in his mind like a <span class="decoy-word blink-slow">stone</span> he kept finding in his pocket. It had to mean something. It had to be <span class="decoy-word blink">real</span>.</p>
+            <p>He did not want <span class="decoy-word blink-fast">flowers</span> that would wilt by the weekend. He did not want <span class="decoy-word blink-slow">chocolate</span> that would be gone by Tuesday. He wanted something she could <span class="decoy-word blink">hold</span>. Something <span class="decoy-word blink-fast">soft</span> and permanent in the way that only <span class="decoy-word blink-slow">simple</span> things can be permanent.</p>
+            <p>So he got her something to hold when he was not there. A <span class="clue-word blink" style="color:white;letter-spacing:0.08em;">teddy bear</span>, small enough to fit in her arms, chosen with the kind of <span class="decoy-word blink">care</span> that does not announce itself. He handed it to her on <span class="clue-word blink-slow" style="color:white;font-weight:700;">August 11</span> and watched her face do the thing he loved most.</p>
+            <p>She <span class="decoy-word blink-fast">smiled</span>. Not the polite kind. The <span class="decoy-word blink">real</span> kind. The kind that starts in the eyes before the mouth even knows what is happening. He <span class="decoy-word blink-slow">filed</span> that smile away somewhere safe and has never stopped <span class="decoy-word blink-fast">carrying</span> it.</p>
+        </div>
+        <button onclick="openModal('modal-3')" class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">ANSWER THE QUESTION →</button>
+    </div>
+</div>
+
+<!-- STAGE 4 - My World Story / July 22 clue -->
+<div id="stage-4" class="stage">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6">
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_04 // GOING DEEPER
+        </div>
+        <h2 class="text-[1.4rem] font-black tracking-tight leading-tight">You are still here.<br><span class="text-neutral-500">He knew you would be.</span></h2>
+        <div class="hint-bar">// not everything blinking is the answer</div>
+        <div class="story-card">
+            <p>There is a particular kind of <span class="decoy-word blink">love</span> that does not need a grand occasion to show itself. It lives in the <span class="decoy-word blink-slow">small</span> things. In the way someone says your name. In the way they <span class="decoy-word blink-fast">remember</span> what you said three weeks ago when you thought nobody was listening.</p>
+            <p>He had a name for her. Not her real name. Something <span class="decoy-word blink">deeper</span> than that. A name that carried everything he could not always say out loud. He called her <span class="clue-word blink" style="color:white;font-weight:700;">My World</span> because that is exactly what she was. Not a <span class="decoy-word blink-slow">metaphor</span>. Not a <span class="decoy-word blink-fast">phrase</span>. A fact.</p>
+            <p>On <span class="clue-word blink-slow" style="color:white;font-weight:700;">July 22</span> something <span class="decoy-word blink">shifted</span>. The kind of shift you only recognize later, when you are looking back and trying to find the exact <span class="decoy-word blink-fast">moment</span> everything changed. It was not loud. It was not <span class="decoy-word blink-slow">dramatic</span>. It was just the beginning of something that would outlast every <span class="decoy-word blink">season</span> that followed.</p>
+            <p>He has never stopped using that name. He never <span class="decoy-word blink-fast">will</span>.</p>
+        </div>
+        <button onclick="openModal('modal-4')" class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">ANSWER THE QUESTION &#8594;</button>
+    </div>
+</div>
+
+<!-- STAGE 5 - JSS 3 Story / 6 years clue -->
+<div id="stage-5" class="stage">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6">
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_05 // ALMOST THERE
+        </div>
+        <h2 class="text-[1.4rem] font-black tracking-tight leading-tight">One more.<br><span class="text-neutral-500">Think back to the beginning.</span></h2>
+        <div class="hint-bar">// where did it all start</div>
+        <div class="story-card">
+            <p>Every <span class="decoy-word blink-slow">story</span> has a starting point. A <span class="decoy-word blink">classroom</span>, a corridor, a moment where two people exist in the same <span class="decoy-word blink-fast">space</span> and something invisible decides that this is where it begins.</p>
+            <p>They were <span class="decoy-word blink">young</span>. Not young in the way people say it dismissively. Young in the way that means everything was still <span class="decoy-word blink-slow">possible</span> and nothing had been decided yet. It was <span class="clue-word blink" style="color:white;font-weight:700;">JSS 3</span> and the world was exactly the right size for what was about to happen.</p>
+            <p>He noticed her the way you notice something that was always <span class="decoy-word blink-fast">there</span> but suddenly becomes <span class="decoy-word blink">impossible</span> to ignore. She was not trying to be noticed. That was probably why he could not stop <span class="decoy-word blink-slow">noticing</span>.</p>
+            <p>That was the <span class="decoy-word blink-fast">beginning</span>. And from that beginning, they built <span class="clue-word blink-slow" style="color:white;font-weight:700;">6</span> years of something real. Something that distance could <span class="decoy-word blink">bend</span> but never break.</p>
+        </div>
+        <button onclick="openModal('modal-5')" class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">ANSWER THE QUESTION &#8594;</button>
+    </div>
+</div>
+
+<!-- STAGE 6 - Final Story / 6th year -->
+<div id="stage-6" class="stage">
+    <div class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-6">
+        <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+            <span class="pulse"></span>
+            STAGE_06 // THE FINAL CHAPTER
+        </div>
+        <h2 class="text-[1.4rem] font-black tracking-tight leading-tight">Six years.<br><span class="text-neutral-500">This is what they built.</span></h2>
+        <div class="hint-bar">// read this one slowly</div>
+        <div class="story-card">
+            <p>Six <span class="decoy-word blink-slow">years</span> is not a small thing. It is not something that happens by <span class="decoy-word blink">accident</span>. It is a choice, made over and over again, on the <span class="decoy-word blink-fast">easy</span> days and especially on the hard ones.</p>
+            <p>There were <span class="decoy-word blink-slow">moments</span> of doubt. There were stretches of <span class="decoy-word blink">silence</span> that felt too long. There were <span class="decoy-word blink-fast">distances</span>, literal and otherwise, that tested what they had built. And yet here they are. Still <span class="decoy-word blink-slow">standing</span>. Still choosing each other.</p>
+            <p>He has a <span class="decoy-word blink">plan</span>. Not a vague wish. Not a <span class="decoy-word blink-fast">dream</span> he keeps to himself. A real, structured, deliberate plan to close every <span class="decoy-word blink-slow">gap</span> between them. He has been building toward it quietly, with the same <span class="decoy-word blink">discipline</span> he brings to everything that matters to him.</p>
+            <p>The <span class="clue-word blink" style="color:white;font-weight:700;">sixth year</span> is not the end of the story. It is the part where the story finally starts <span class="decoy-word blink-fast">moving</span> in the direction it was always supposed to go. He is <span class="decoy-word blink-slow">ready</span>. And he has one last question for you.</p>
+        </div>
+        <button onclick="openModal('modal-6')" class="mono text-[11px] uppercase tracking-widest border border-white/20 rounded-lg px-5 py-4 text-white/60 hover:text-white hover:border-white/50 transition-all text-left">THE FINAL QUESTION &#8594;</button>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     WELCOME SCREEN
+══════════════════════════════════════ -->
+<div id="welcome-screen">
+    <p class="mono text-[10px] text-neutral-600 tracking-widest mb-6">// ACCESS GRANTED</p>
+    <h1 class="text-[2.2rem] font-black tracking-tight leading-tight mb-4">
+        Welcome,<br>Mrs Asagwara<br>Nifemi.
+    </h1>
+    <p class="text-[13px] text-neutral-400 font-light mb-10">He has been waiting to show you this.</p>
+    <button onclick="showPlan()"
+        class="mono text-[11px] uppercase tracking-widest border border-white/30 rounded-lg px-6 py-4 text-white hover:border-white transition-all">
+        OPEN THE PLAN →
+    </button>
+</div>
+
+
+<!-- PLAN PAGE -->
+<div id="plan-page" class="w-full max-w-lg mx-auto px-4 sm:px-5 py-14 flex flex-col gap-8">
+
+    <div class="mono text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2">
+        <span class="pulse"></span>
+        OPERATION REUNITE // CLASSIFIED DOCUMENT
+    </div>
+
+    <div>
+        <h1 class="text-[1.6rem] font-black tracking-tight leading-tight mb-3">Operation Reunite<br>with Nifemi</h1>
+        <p class="text-[13px] text-neutral-400 font-light leading-relaxed">A strategic reconciliation plan. Systematically leveraging Backend Engineering and DevOps expertise to secure a sponsored relocation to the United Kingdom, permanently closing the distance.</p>
+    </div>
+
+    <div>
+        <div class="section-label">PHASE 1 // SOLO MASTERY</div>
+        <div class="plan-phase">
+            <h3>The Solo Mastery Unanchoring (Months 1-3)</h3>
+            <p>Eliminate dependency on AI assistance to build verifiable, unassisted technical capability.</p>
+            <ul>
+                <li>Build 3 Solo APIs from memory: Todo API, URL Shortener, Fitness Logger using pure Spring Boot, PostgreSQL, and Docker without AI assistance.</li>
+                <li>Force every endpoint to use distinct DTOs (RequestDTO and ResponseDTO) and enforce clean global exception handling.</li>
+                <li>Spin up and connect PostgreSQL containers manually via Docker networks without automated initializers.</li>
+            </ul>
+            <p style="margin-top:12px;color:rgba(255,255,255,0.35);">Interviewers at international firms spot AI-generated patterns easily. Building muscle memory guarantees passing live technical pairing interviews.</p>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-label">PHASE 2 // AUTOMATED DEPLOYMENT</div>
+        <div class="plan-phase">
+            <h3>Automated Deployment and Observability (Months 4-5)</h3>
+            <p>Master the infrastructure layer that separates standard developers from high-value DevOps Engineers.</p>
+            <ul>
+                <li>Implement GitHub Actions CI/CD: custom YAML workflows to run tests, build Docker images, push to Docker Hub, and deploy to live cloud infrastructure.</li>
+                <li>Integrate Spring Boot Actuator, Prometheus, and Grafana to track container metrics and application health on live servers.</li>
+                <li>Inject sonar-type linter checks into the GitHub pipeline to enforce clean coding standards automatically.</li>
+            </ul>
+            <p style="margin-top:12px;color:rgba(255,255,255,0.35);">International companies hiring from abroad want engineers who understand how code lives, updates, and scales securely on real cloud environments.</p>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-label">PHASE 3 // PORTFOLIO AND OUTREACH</div>
+        <div class="plan-phase">
+            <h3>Portfolio Packaging and Outreach (Months 6-7)</h3>
+            <p>Transform the digital footprint into an active recruitment magnet focused on the UK market.</p>
+            <ul>
+                <li>Ensure the primary repository contains clean markdown files highlighting architectural design choices, database schema diagrams, and active deployment links.</li>
+                <li>Restructure resume and portfolio to target Backend/DevOps Engineer roles, leading with containerized multi-tier web applications, Spring Security JWT, and AWS deployments.</li>
+                <li>Identify, track, and connect with technical recruiters and engineering managers inside UK-based startups and mid-market technical firms.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-label">PHASE 4 // VISA ROUTES</div>
+        <div class="plan-phase">
+            <h3>Route A: Skilled Worker Visa (The Core Route)</h3>
+            <p>Direct employment sponsorship by a UK company holding an approved Home Office Sponsor Licence.</p>
+            <ul>
+                <li>Role must fall under SOC 2020 Code 2134 (Software Developer / DevOps Engineer).</li>
+                <li>Minimum base salary threshold of £41,700 or the going rate of approx. £45,400, whichever is higher.</li>
+                <li>New Entrant Advantage: as an undergraduate under 26, the required threshold drops to £30,960, making sponsorship significantly cheaper and more attractive for UK businesses.</li>
+            </ul>
+        </div>
+        <div class="plan-phase">
+            <h3>Route B: Scale-Up Worker Visa (The Flexibility Route)</h3>
+            <p>Getting hired by an approved fast-growing UK Scale-Up business demonstrating 20% sustained annual growth.</p>
+            <ul>
+                <li>Requires company sponsorship only for the first 6 months.</li>
+                <li>After 6 months the visa unlocks into unsponsored status, meaning free movement between companies within the UK without a new visa application.</li>
+                <li>Minimum base salary of £39,100 per year.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:24px 20px;background:rgba(255,255,255,0.02);text-align:center;">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">// EXPECTED FINAL OUTCOME</p>
+        <p class="text-[13px] text-neutral-300 font-light leading-relaxed">By combining production-grade Spring Boot expertise, standalone DevOps cloud capability, and targeted application strategies toward licensed UK employers, the plan positions him to land a sponsored technical role, securely facilitating entry into the UK and achieving permanent reunion with Nifemi.</p>
+        <p class="mono text-[11px] font-bold tracking-widest mt-6 text-white">// I AM COMING FOR YOU, MY WORLD.</p>
+    </div>
+
+    <a href="./index.html" class="mono text-[10px] uppercase tracking-widest text-neutral-600 hover:text-white transition-all text-center py-4">back to portfolio</a>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     MODAL — STAGE 1
+══════════════════════════════════════ -->
+<div id="modal-1" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_01 // HOW WELL DO YOU KNOW HIM</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">How old is Nelson?</h2>
+        <div id="options-1">
+            <button class="option-btn" onclick="checkAnswer(1, '18')">A. 18</button>
+            <button class="option-btn" onclick="checkAnswer(1, '20')">B. 20</button>
+            <button class="option-btn" onclick="checkAnswer(1, '19')">C. 19</button>
+            <button class="option-btn" onclick="checkAnswer(1, '21')">D. 21</button>
+        </div>
+        <p id="feedback-1" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+
+<!-- MODAL STAGE 6 -->
+<div id="modal-6" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_06 // THE ONLY QUESTION THAT MATTERS</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">Does Nelson love you?</h2>
+        <div id="options-6">
+            <button class="option-btn" onclick="checkAnswer(6, 'yes')">A. Yes</button>
+            <button class="option-btn" onclick="checkFinalNo()">B. No</button>
+        </div>
+        <p id="feedback-6" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+<!-- MODAL STAGE 4 -->
+<div id="modal-4" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_04 // HIS NAME FOR YOU</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">What does Nelson normally call you?</h2>
+        <div id="options-4">
+            <button class="option-btn" onclick="checkAnswer(4, 'baby')">A. Baby</button>
+            <button class="option-btn" onclick="checkAnswer(4, 'my world')">B. My World</button>
+            <button class="option-btn" onclick="checkAnswer(4, 'sweetheart')">C. Sweetheart</button>
+            <button class="option-btn" onclick="checkAnswer(4, 'love')">D. Love</button>
+        </div>
+        <p id="feedback-4" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+<!-- MODAL STAGE 5 -->
+<div id="modal-5" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_05 // THE YEARS</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">How many years have you and Nelson been together?</h2>
+        <div id="options-5">
+            <button class="option-btn" onclick="checkAnswer(5, '4')">A. 4</button>
+            <button class="option-btn" onclick="checkAnswer(5, '5')">B. 5</button>
+            <button class="option-btn" onclick="checkAnswer(5, '6')">C. 6</button>
+            <button class="option-btn" onclick="checkAnswer(5, '7')">D. 7</button>
+        </div>
+        <p id="feedback-5" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+<!-- MODAL STAGE 2 -->
+<div id="modal-2" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_02 // THE FIRST KISS</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">What was she wearing on your first kiss?</h2>
+        <div id="options-2">
+            <button class="option-btn" onclick="checkAnswer(2, 'black jacket')">A. Black jacket</button>
+            <button class="option-btn" onclick="checkAnswer(2, 'pink sweater')">B. Pink sweater</button>
+            <button class="option-btn" onclick="checkAnswer(2, 'white dress')">C. White dress</button>
+            <button class="option-btn" onclick="checkAnswer(2, 'blue shirt')">D. Blue shirt</button>
+        </div>
+        <p id="feedback-2" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+<!-- MODAL STAGE 3 -->
+<div id="modal-3" class="modal-overlay">
+    <div class="modal-box">
+        <p class="mono text-[9px] text-neutral-600 tracking-widest mb-4">QUESTION_03 // VALENTINE'S DAY</p>
+        <h2 class="text-[15px] font-bold mb-6 leading-snug">What did Nelson give you for Valentine's Day?</h2>
+        <div id="options-3">
+            <button class="option-btn" onclick="checkAnswer(3, 'flowers')">A. Flowers</button>
+            <button class="option-btn" onclick="checkAnswer(3, 'chocolate')">B. Chocolate</button>
+            <button class="option-btn" onclick="checkAnswer(3, 'teddy bear')">C. Teddy bear</button>
+            <button class="option-btn" onclick="checkAnswer(3, 'perfume')">D. Perfume</button>
+        </div>
+        <p id="feedback-3" class="mono text-[10px] mt-4 text-center" style="min-height:18px;"></p>
+    </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────
+const ANSWERS = {
+    1: '19',
+    2: 'pink sweater',
+    3: 'teddy bear',
+    4: 'my world',
+    5: '6',
+    6: 'yes'
+};
+
+function openModal(id) {
+    document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+
+function checkAnswer(stage, chosen) {
+    const correct = ANSWERS[stage];
+    const feedback = document.getElementById(`feedback-${stage}`);
+    const btns = document.querySelectorAll(`#options-${stage} .option-btn`);
+
+    if (chosen.toLowerCase() === correct.toLowerCase()) {
+        btns.forEach(b => {
+            if (b.textContent.toLowerCase().includes(correct.toLowerCase())) {
+                b.classList.add('correct');
+            }
+        });
+        feedback.textContent = '// CORRECT. UNLOCKING NEXT STAGE...';
+        feedback.style.color = 'rgba(255,255,255,0.7)';
+        setTimeout(() => {
+            closeModal(`modal-${stage}`);
+            goToStage(stage + 1);
+        }, 1200);
+    } else {
+        const btn = [...btns].find(b => b.textContent.toLowerCase().includes(chosen.toLowerCase()));
+        if (btn) {
+            btn.classList.add('wrong');
+            btn.closest('.modal-box').classList.add('shake');
+            setTimeout(() => {
+                btn.classList.remove('wrong');
+                btn.closest('.modal-box').classList.remove('shake');
+            }, 500);
+        }
+        feedback.textContent = '// INCORRECT. TRY AGAIN.';
+        feedback.style.color = 'rgba(255,80,80,0.8)';
+    }
+}
+
+function checkFinalNo() {
+    const feedback = document.getElementById('feedback-6');
+    const box = document.querySelector('#modal-6 .modal-box');
+    box.classList.add('shake');
+    setTimeout(() => box.classList.remove('shake'), 500);
+    feedback.textContent = '// try again, you know the answer.';
+    feedback.style.color = 'rgba(255,80,80,0.8)';
+}
+
+function goToStage(n) {
+    if (n === 7) { showWelcome(); return; }
+    document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+    const next = document.getElementById(`stage-${n}`);
+    if (next) {
+        next.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function showWelcome() {
+    document.getElementById('welcome-screen').classList.add('show');
+    window.scrollTo({ top: 0 });
+}
+
+function showPlan() {
+    document.getElementById('welcome-screen').classList.remove('show');
+    document.getElementById('plan-page').classList.add('show');
+    window.scrollTo({ top: 0 });
+}
+</script>
+
+</body>
+</html>
